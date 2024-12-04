@@ -1,9 +1,9 @@
+# Symmetric Cipher Web Application
 
-Symmetric Ciphers
-A simple web-based application for encrypting and decrypting data using symmetric encryption algorithms.
+A simple and interactive web application for encrypting and decrypting text using popular symmetric cipher techniques like Caesar, Vigenère, Columnar, and AES.
 
-Features
-  - Encrypt and decrypt messages using symmetric ciphers.
-  - Supports various algorithms like AES, DES, and others.
-  - Secure and easy-to-use interface.
-  - User-friendly design with clear inputs and outputs.
+## Features:
+  - Encrypt and decrypt text using various symmetric cipher algorithms.
+  - Supports Caesar Cipher, Vigenère Cipher, Columnar Transposition Cipher, and AES.
+  - User-friendly web interface for easy input and output.
+  - Secure handling of keys for AES encryption.
