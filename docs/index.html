@@ -3,9 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Symmetric Ciphers</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .cipher-selection, .cipher-form {
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #result {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-    <h1> Hello Everyone</h1>
+    <div class="container">
+        <h1>Symmetric Ciphers</h1>
+        <div class="cipher-selection">
+            <label for="cipher-select">Choose a Cipher:</label>
+            <select id="cipher-select">
+                <option value="">Select Cipher</option>
+                <option value="caesar">Caesar Cipher</option>
+                <option value="vigenere">Vigenère Cipher</option>
+                <option value="singlecolumnar">Single Columnar Cipher</option>
+                <option value="doublecolumnar">Double Columnar Cipher</option>
+                <option value="aes">AES Cipher</option>
+            </select>
+        </div>
+
+        <div class="cipher-form">
+            <label for="input-text">Text to Encrypt/Decrypt:</label>
+            <input type="text" id="input-text" placeholder="Enter text">
+
+            <label for="key" id="key-label">Key:</label>
+            <input type="text" id="key" placeholder="Enter key">
+
+            <!-- Shift input field for Caesar Cipher only -->
+            <label for="shift" id="shift-label" style="display:none;">Shift:</label>
+            <input type="number" id="shift" placeholder="Enter shift" style="display:none;">
+
+            <!-- Key2 input field for Double Columnar Cipher -->
+            <label for="key2" id="key2-label" style="display:none;">Key 2:</label>
+            <input type="text" id="key2" placeholder="Enter second key" style="display:none;">
+
+            <!-- AES Key Length Selection -->
+            <label for="aes-key-length" id="aes-key-length-label" style="display:none;">AES Key Length:</label>
+            <select id="aes-key-length" style="display:none;">
+                <option value="128">128 bits</option>
+                <option value="192">192 bits</option>
+                <option value="256">256 bits</option>
+            </select>
+
+            <button onclick="processEncrypt()">Encrypt</button>
+            <button onclick="processDecrypt()">Decrypt</button> 
+            <button onclick="refreshPage()">Clear</button>
+
+            <h2>Result:</h2>
+            <p id="result"></p>
+        </div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
+    <script>
+        function refreshPage() {
+      location.reload(); // Refresh the page
+    }
+        // Caesar Cipher - Fixed Encryption Function
+        function caesarCipher(str, shift) {
+            return str.split('').map(char => {
+                if (/[a-zA-Z]/.test(char)) {
+                    const code = char.charCodeAt(0);
+                    const base = (char >= 'a' && char <= 'z') ? 97 : 65;
+                    return String.fromCharCode(((code - base + shift + 26) % 26) + base); // Ensure shift is positive
+                }
+                return char;
+            }).join('');
+        }
+
+        // Vigenère Cipher Encryption and Decryption
+        function vigenereCipher(str, key, decrypt = false) {
+            let result = '';
+            let keyIndex = 0;
+            
+            // If decrypting, reverse the shift
+            const shiftDirection = decrypt ? -1 : 1;
+
+            for (let i = 0; i < str.length; i++) {
+                const char = str[i];
+                if (/[a-zA-Z]/.test(char)) {
+                    // Calculate shift based on key character
+                    const shift = key[keyIndex % key.length].toUpperCase().charCodeAt(0) - 65;
+                    const base = (char >= 'a' && char <= 'z') ? 97 : 65;
+                    result += String.fromCharCode(((char.charCodeAt(0) - base + shiftDirection * shift) % 26 + 26) % 26 + base);
+                    keyIndex++;
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+
+        // Single Columnar Cipher Encryption
+        function columnarCipherEncrypt(str, key) {
+    // Replace spaces with underscores
+    str = str.replace(/ /g, '_');
+
+    const keyLength = key.length;
+    const rows = Math.ceil(str.length / keyLength);
+
+    // Create an empty array for each column
+    const columns = Array.from({ length: keyLength }, () => []);
+
+    // Fill columns with characters from the plaintext
+    for (let i = 0; i < str.length; i++) {
+        const columnIndex = i % keyLength;
+        columns[columnIndex].push(str[i]);
+    }
+
+    // Reorder the columns based on the keyword order
+    const sortedKey = Array.from(key)
+        .map((char, i) => ({ char, index: i }))
+        .sort((a, b) => a.char.localeCompare(b.char));
+
+    // Construct the ciphertext by reading columns in sorted order
+    let ciphertext = '';
+    for (let { index } of sortedKey) {
+        ciphertext += columns[index].join('');
+    }
+
+    return ciphertext;
+}
+
+        // Single Columnar Cipher Decryption
+        function columnarCipherDecrypt(str, key) {
+            const keyLength = key.length;
+            const rows = Math.ceil(str.length / keyLength);
+
+            // Create an array to store columns
+            const columns = Array.from({ length: keyLength }, () => []);
+
+            // Calculate how many characters each column will have
+            const columnLengths = Array(keyLength).fill(Math.floor(str.length / keyLength));
+            for (let i = 0; i < str.length % keyLength; i++) {
+                columnLengths[i]++;
+            }
+
+            // Reorder the columns based on the keyword order
+            const sortedKey = Array.from(key)
+                .map((char, i) => ({ char, index: i }))
+                .sort((a, b) => a.char.localeCompare(b.char));
+
+            // Distribute the ciphertext into columns based on the sorted keyword
+            let index = 0;
+            for (let { index: columnIndex } of sortedKey) {
+                const columnLength = columnLengths[columnIndex];
+                columns[columnIndex] = str.slice(index, index + columnLength).split('');
+                index += columnLength;
+            }
+
+            // Read the matrix row by row
+            let decryptedText = '';
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < keyLength; j++) {
+                    if (columns[j][i]) {
+                        decryptedText += columns[j][i];
+                    }
+                }
+            }
+
+            return decryptedText;
+        }
+
+        // Double Columnar Cipher Decryption
+        function doubleColumnarCipherDecrypt(str, key1, key2) {
+            const rows = Math.ceil(str.length / key1.length);
+            const cols = key1.length;
+            let matrix = Array(rows).fill().map(() => Array(cols).fill(''));
+
+            // Sort the second key
+            const sortedKey2Indices = Array.from(key2).map((char, i) => ({ char, index: i }))
+                .sort((a, b) => a.char.localeCompare(b.char))
+                .map(item => item.index);
+
+            let index = 0;
+            for (const idx of sortedKey2Indices) {
+                for (let i = 0; i < rows; i++) {
+                    matrix[i][idx] = str[index++];
+                }
+            }
+
+            // Read row by row to get the decrypted text
+            let decrypted = '';
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    decrypted += matrix[i][j];
+                }
+            }
+
+            return decrypted;
+            
+}
+
+// AES Cipher Encryption using CryptoJS
+function aesEncrypt(str, key) {
+    // Generate the AES key by padding it to match the correct length (128, 192, 256 bits)
+    const keyUtf8 = CryptoJS.enc.Utf8.parse(key);
+    const encrypted = CryptoJS.AES.encrypt(str, keyUtf8, { keySize: 128 / 32, iv: CryptoJS.enc.Utf8.parse('0000000000000000') });
+    return encrypted.toString();  // Return the encrypted text as Base64 string
+}
+
+// AES Cipher Decryption using CryptoJS
+function aesDecrypt(str, key) {
+    // Generate the AES key by padding it to match the correct length (128, 192, 256 bits)
+    const keyUtf8 = CryptoJS.enc.Utf8.parse(key);
+    const decrypted = CryptoJS.AES.decrypt(str, keyUtf8, { keySize: 128 / 32, iv: CryptoJS.enc.Utf8.parse('0000000000000000') });
+    return decrypted.toString(CryptoJS.enc.Utf8);  // Convert decrypted bytes back to UTF-8 string
+}
+
+        // Process Encrypt based on selected cipher
+        function processEncrypt() {
+            const cipherSelect = document.getElementById('cipher-select').value;
+            const inputText = document.getElementById('input-text').value;
+            const key = document.getElementById('key').value;
+            let result = '';
+
+            switch (cipherSelect) {
+                case 'caesar':
+                    const shift = parseInt(document.getElementById('shift').value);
+                    result = caesarCipher(inputText, shift);
+                    break;
+                case 'vigenere':
+                    result = vigenereCipher(inputText, key);
+                    break;
+                case 'singlecolumnar':
+                    result = columnarCipherEncrypt(inputText, key);
+                    break;
+                case 'doublecolumnar':
+                    const key2 = document.getElementById('key2').value;
+                    result = columnarCipherEncrypt(inputText, key);
+                    break;
+                case 'aes':
+                    result = aesEncrypt(inputText, key);  // Using the AES encryption function
+                    break;
+                default:
+                    result = 'Please select a cipher method.';
+            }
+
+            document.getElementById('result').textContent = `Encrypted Text: ${result}`;
+        }
+
+        // Process Decrypt based on selected cipher
+        function processDecrypt() {
+            const cipherSelect = document.getElementById('cipher-select').value;
+            const inputText = document.getElementById('input-text').value;
+            const key = document.getElementById('key').value;
+            let result = '';
+
+            switch (cipherSelect) {
+                case 'caesar':
+                    const shift = parseInt(document.getElementById('shift').value);
+                    result = caesarCipher(inputText, -shift);  // Decrypt by reversing the shift
+                    break;
+                case 'vigenere':
+                    result = vigenereCipher(inputText, key, true);
+                    break;
+                case 'singlecolumnar':
+                    result = columnarCipherDecrypt(inputText, key);
+                    break;
+                case 'doublecolumnar':
+                    const key2 = document.getElementById('key2').value;
+                    result = doubleColumnarCipherDecrypt(inputText, key, key2);
+                    break;
+                case 'aes':
+                    result = aesDecrypt(inputText, key);
+                    break;
+                default:
+                    result = 'Please select a cipher method.';
+            }
+
+            document.getElementById('result').textContent = `Decrypted Text: ${result}`;
+        }
+
+        // Update form fields based on selected cipher
+        document.getElementById('cipher-select').addEventListener('change', function () {
+            const cipherSelect = this.value;
+
+            // Show/Hide appropriate input fields based on cipher selected
+            document.getElementById('shift-label').style.display = (cipherSelect === 'caesar') ? 'block' : 'none';
+            
+            document.getElementById('shift').style.display = (cipherSelect === 'caesar') ? 'block' : 'none';
+            document.getElementById('key-label').style.display = (cipherSelect === 'caesar') ? 'none' : 'block';
+            
+            document.getElementById('key').style.display = (cipherSelect === 'caesar') ? 'none' : 'block';
+            document.getElementById('key2-label').style.display = (cipherSelect === 'doublecolumnar') ? 'block' : 'none';
+            document.getElementById('key2').style.display = (cipherSelect === 'doublecolumnar') ? 'block' : 'none';
+
+            document.getElementById('aes-key-length-label').style.display = (cipherSelect === 'aes') ? 'block' : 'none';
+            document.getElementById('aes-key-length').style.display = (cipherSelect === 'aes') ? 'block' : 'none';
+        });
+    </script>
 </body>
 </html>
