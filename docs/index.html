@@ -152,7 +152,7 @@
                     break;
                 case 'doublecolumnar':
                     const key2 = document.getElementById('key2').value;
-                    result = columnarCipherEncrypt(inputText, key);
+                    result = doubleColumnarCipherEncrypt(inputText, key, key2);
                     break;
                 case 'aes':
                     result = aesEncrypt(inputText, key);  // Using the AES encryption function
