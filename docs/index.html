@@ -116,234 +116,202 @@
             }
         }
 
-        // Process Encrypt based on selected cipher
-        function processEncrypt() {
-            clearVisualization();
-            const cipherSelect = document.getElementById('cipher-select').value;
-            const inputText = document.getElementById('input-text').value;
-            const key = document.getElementById('key').value;
-            let result = '';
+       // Encryption for Single Columnar Cipher
+function processEncrypt() {
+    clearVisualization();
+    const cipherSelect = document.getElementById('cipher-select').value;
+    const inputText = document.getElementById('input-text').value;
+    const key = document.getElementById('key').value;
+    let result = '';
 
-            switch (cipherSelect) {
-                case 'caesar':
-                    const shift = parseInt(document.getElementById('shift').value);
-                    addVisualizationStep('Input', inputText, 'Original text');
-                    addVisualizationStep('Process', [
-                        `Shift: ${shift}`,
-                        `A → ${String.fromCharCode(65 + (shift % 26))}`,
-                        `B → ${String.fromCharCode(66 + (shift % 26))}`,
-                        '...'
-                    ], 'Character mapping');
-                    result = caesarCipher(inputText, shift);
-                    addVisualizationStep('Output', result, 'Encrypted text');
-                    break;
-                case 'vigenere':
-                    addVisualizationStep('Input', inputText, 'Original text');
-                    addVisualizationStep('Key', [
-                        `Key: ${key}`,
-                        'Key repeated:',
-                        `${key.repeat(Math.ceil(inputText.length / key.length)).slice(0, inputText.length)}`
-                    ]);
-                    result = vigenereCipher(inputText, key);
-                    addVisualizationStep('Output', result, 'Encrypted text');
-                    break;
-                case 'singlecolumnar':
-                    result = createColumnarVisualization(inputText, key, true);
-                    break;
+    switch (cipherSelect) {
+        case 'caesar':
+            const shift = parseInt(document.getElementById('shift').value);
+            addVisualizationStep('Input', inputText, 'Original text');
+            addVisualizationStep('Process', [
+                `Shift: ${shift}`,
+                `A → ${String.fromCharCode(65 + (shift % 26))}`,
+                `B → ${String.fromCharCode(66 + (shift % 26))}`,
+                '...'
+            ], 'Character mapping');
+            result = caesarCipher(inputText, shift);
+            addVisualizationStep('Output', result, 'Encrypted text');
+            break;
+
+        case 'vigenere':
+            addVisualizationStep('Input', inputText, 'Original text');
+            addVisualizationStep('Key', [
+                `Key: ${key}`,
+                'Key repeated:',
+                `${key.repeat(Math.ceil(inputText.length / key.length)).slice(0, inputText.length)}`
+            ]);
+            result = vigenereCipher(inputText, key);
+            addVisualizationStep('Output', result, 'Encrypted text');
+            break;
+
+            case 'singlecolumnar':
+    addVisualizationStep('Input', inputText, 'Original text');
+    addVisualizationStep('Key', key, 'Key used for columnar transposition');
+    
+    // Call the single columnar cipher encryption function
+    result = singleColumnarCipherEncrypt(inputText, key);
+    
+    // Add final visualization step to display the encrypted text
+    addVisualizationStep('Output', result, 'Encrypted text after single columnar cipher');
+    break;
+
+
+
+
                 case 'doublecolumnar':
-                    const key2 = document.getElementById('key2').value;
-                    result = doubleColumnarCipherEncrypt(inputText, key, key2);
-                    break;
-                case 'aes':
-                    result = aesEncrypt(inputText, key);  // Using the AES encryption function
-                    break;
-                default:
-                    result = 'Please select a cipher method.';
-            }
+    const key2 = document.getElementById('key2').value;
+    addVisualizationStep('Input', inputText, 'Original text');
+    addVisualizationStep('Key1', key, 'First key used for columnar transposition');
+    addVisualizationStep('Key2', key2, 'Second key used for columnar transposition');
+    
+    // Call the double columnar cipher encryption function
+    result = doubleColumnarCipherEncrypt(inputText, key, key2);
+    
+    // Add final visualization step to display the encrypted text
+    addVisualizationStep('Output', result, 'Encrypted text after double columnar cipher');
+    break;
 
-            document.getElementById('result').textContent = `Encrypted Text: ${result}`;
-        }
 
-        // Process Decrypt based on selected cipher
-        function processDecrypt() {
-            const cipherSelect = document.getElementById('cipher-select').value;
-            const inputText = document.getElementById('input-text').value;
-            const key = document.getElementById('key').value;
-            let result = '';
+        case 'aes':
+            result = aesEncrypt(inputText, key);  // Using the AES encryption function
+            break;
 
-            switch (cipherSelect) {
-                case 'caesar':
-                    const shift = parseInt(document.getElementById('shift').value);
-                    result = caesarCipher(inputText, -shift);  // Decrypt by reversing the shift
-                    break;
-                case 'vigenere':
-                    result = vigenereCipher(inputText, key, true);
-                    break;
-                case 'singlecolumnar':
-                    result = createColumnarVisualization(inputText, key, false);
-                    break;
-                case 'doublecolumnar':
-                    const key2 = document.getElementById('key2').value;
-                    result = doubleColumnarCipherDecrypt(inputText, key, key2);
-                    break;
-                case 'aes':
-                    result = aesDecrypt(inputText, key);
-                    break;
-                default:
-                    result = 'Please select a cipher method.';
-            }
+        default:
+            result = 'Please select a cipher method.';
+    }
 
-            document.getElementById('result').textContent = `Decrypted Text: ${result}`;
-        }
+    document.getElementById('result').textContent = `Encrypted Text: ${result}`;
+}
 
-        // Update form fields based on selected cipher
-        document.getElementById('cipher-select').addEventListener('change', function () {
-            const cipherSelect = this.value;
+// Decryption for Single Columnar Cipher
+function processDecrypt() {
+    clearVisualization();
+    const cipherSelect = document.getElementById('cipher-select').value;
+    const inputText = document.getElementById('input-text').value;
+    const key = document.getElementById('key').value;
+    let result = '';
 
-            // Show/Hide appropriate input fields based on cipher selected
-            document.getElementById('shift-label').style.display = (cipherSelect === 'caesar') ? 'block' : 'none';
+    switch (cipherSelect) {
+        case 'caesar':
+            const shift = parseInt(document.getElementById('shift').value);
+            addVisualizationStep('Input', inputText, 'Encrypted text');
+            addVisualizationStep('Process', [
+                `Shift: ${-shift}`,
+                `A → ${String.fromCharCode(65 + ((-shift + 26) % 26))}`,
+                `B → ${String.fromCharCode(66 + ((-shift + 26) % 26))}`,
+                '...'
+            ], 'Character mapping (reversed)');
+            result = caesarCipher(inputText, -shift); // Decrypt by reversing the shift
+            addVisualizationStep('Output', result, 'Decrypted text');
+            break;
+
+        case 'vigenere':
+            addVisualizationStep('Input', inputText, 'Encrypted text');
+            addVisualizationStep('Key', key, 'Decryption key');
             
-            document.getElementById('shift').style.display = (cipherSelect === 'caesar') ? 'block' : 'none';
-            document.getElementById('key-label').style.display = (cipherSelect === 'caesar') ? 'none' : 'block';
-            
-            document.getElementById('key').style.display = (cipherSelect === 'caesar') ? 'none' : 'block';
-            document.getElementById('key2-label').style.display = (cipherSelect === 'doublecolumnar') ? 'block' : 'none';
-            document.getElementById('key2').style.display = (cipherSelect === 'doublecolumnar') ? 'block' : 'none';
-
-            document.getElementById('aes-key-length-label').style.display = (cipherSelect === 'aes') ? 'block' : 'none';
-            document.getElementById('aes-key-length').style.display = (cipherSelect === 'aes') ? 'block' : 'none';
-        });
-
-        function createColumnarVisualization(text, key, isEncryption = true) {
-            clearVisualization();
-            const visualizationSteps = document.getElementById('visualization-steps');
-
-            // Add encryption details
-            const details = document.createElement('div');
-            details.className = 'encryption-details';
-            details.innerHTML = `
-                Given text = ${text}<br>
-                Keyword = ${key}<br>
-                Length of Keyword = ${key.length} (no of rows)<br>
-                Order of Alphabets in ${key} = ${getAlphabetOrder(key).join('')}
-            `;
-            visualizationSteps.appendChild(details);
-
-            const order = getAlphabetOrder(key);
-            const numRows = Math.ceil(text.length / key.length);
-            const numCols = key.length;
-            const matrix = Array(numRows).fill().map(() => Array(numCols).fill('_'));
-
-            if (isEncryption) {
-                // Fill matrix row by row for encryption
-                let pos = 0;
-                for (let row = 0; row < numRows && pos < text.length; row++) {
-                    for (let col = 0; col < numCols && pos < text.length; col++) {
-                        matrix[row][col] = text[pos++];
-                    }
-                }
-            } else {
-                // Fill matrix column by column for decryption
-                const charsPerCol = Math.ceil(text.length / numCols);
-                let pos = 0;
-                
-                // Calculate chars in each column
-                const colLengths = Array(numCols).fill(numRows);
-                const remainingChars = text.length % numCols;
-                if (remainingChars > 0) {
-                    for (let i = numCols - 1; i >= numCols - (numCols - remainingChars); i--) {
-                        colLengths[order.indexOf(i + 1)]--;
-                    }
-                }
-
-                // Fill columns according to order
-                for (let orderIndex = 1; orderIndex <= numCols; orderIndex++) {
-                    const col = order.indexOf(orderIndex);
-                    for (let row = 0; row < colLengths[col] && pos < text.length; row++) {
-                        matrix[row][col] = text[pos++];
-                    }
+            const decryptionSteps = [];
+            const shiftDirection = -1; // Decryption reverses the shift
+            let keyIndex = 0;
+            for (let i = 0; i < inputText.length; i++) {
+                const char = inputText[i];
+                if (/[a-zA-Z]/.test(char)) {
+                    const shift = key[keyIndex % key.length].toUpperCase().charCodeAt(0) - 65;
+                    const base = (char >= 'a' && char <= 'z') ? 97 : 65;
+                    const originalChar = char;
+                    const decryptedChar = String.fromCharCode(((char.charCodeAt(0) - base + shiftDirection * shift) % 26 + 26) % 26 + base);
+                    decryptionSteps.push(`
+                        Encrypted: ${originalChar}, 
+                        Key Char: ${key[keyIndex % key.length]}, 
+                        Shift: ${shiftDirection * shift}, 
+                        Result: ${decryptedChar}
+                    `);
+                    keyIndex++;
+                    result += decryptedChar;
+                } else {
+                    result += char; // Non-alphabetic characters remain unchanged
                 }
             }
 
-            // Create and display the grid
-            const table = document.createElement('table');
-            table.className = 'visualization-grid';
+            addVisualizationStep('Process', decryptionSteps, 'Character-by-character decryption');
+            addVisualizationStep('Output', result, 'Decrypted text');
+            break;
 
-            // Add header row with key letters
-            const headerRow = document.createElement('tr');
-            [...key].forEach(letter => {
-                const th = document.createElement('th');
-                th.textContent = letter;
-                headerRow.appendChild(th);
-            });
-            table.appendChild(headerRow);
+          // In the 'singlecolumnar' case:
+case 'singlecolumnar':
+    const singleColumnarKey = document.getElementById('key').value; // Rename the key variable
+    addVisualizationStep('Input', inputText, 'Encrypted text to decrypt');
+    addVisualizationStep('Key', singleColumnarKey, 'Key used for the columnar transposition');
 
-            // Add number row
-            const numberRow = document.createElement('tr');
-            numberRow.className = 'number-row';
-            order.forEach(num => {
-                const td = document.createElement('td');
-                td.textContent = num;
-                numberRow.appendChild(td);
-            });
-            table.appendChild(numberRow);
+    // Step 1: Explain reversing transposition
+    addVisualizationStep('Process', [
+        `Reversing transposition using Key: ${singleColumnarKey}`,
+        'Reconstructing matrix column by column based on the sorted key'
+    ], 'Step 1: Reverse transposition');
 
-            // Add matrix content
-            matrix.forEach((rowData, i) => {
-                const row = document.createElement('tr');
-                rowData.forEach((char, j) => {
-                    const td = document.createElement('td');
-                    td.textContent = char;
-                    if (isEncryption && j === key.length - 1) {
-                        td.innerHTML += '<div class="visualization-arrow">↓</div>';
-                    }
-                    row.appendChild(td);
-                });
-                table.appendChild(row);
-            });
+    // Call the single columnar cipher decryption function
+    result = singleColumnarCipherDecrypt(inputText, singleColumnarKey);
 
-            visualizationSteps.appendChild(table);
+    // Add final visualization step to display the decrypted text
+    addVisualizationStep('Output', result, 'Decrypted text');
+    break;
 
-            // Calculate result
-            let result = '';
-            if (isEncryption) {
-                // Read down columns in order
-                for (let orderIndex = 1; orderIndex <= numCols; orderIndex++) {
-                    const col = order.indexOf(orderIndex);
-                    for (let row = 0; row < numRows; row++) {
-                        if (matrix[row][col] !== '_') {
-                            result += matrix[row][col];
-                        }
-                    }
-                }
-            } else {
-                // Read across rows
-                for (let row = 0; row < numRows; row++) {
-                    for (let col = 0; col < numCols; col++) {
-                        if (matrix[row][col] !== '_') {
-                            result += matrix[row][col];
-                        }
-                    }
-                }
-            }
+// In the 'doublecolumnar' case:
+case 'doublecolumnar':
+    const firstKey = document.getElementById('key').value; // Keep the first key
+    const secondKey = document.getElementById('key2').value; // Get the second key
+    addVisualizationStep('Input', inputText, 'Encrypted text to decrypt');
+    addVisualizationStep('Key1', firstKey, 'First key used for the first columnar transposition');
+    addVisualizationStep('Key2', secondKey, 'Second key used for the second columnar transposition');
 
-            // Add result
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'encryption-result';
-            resultDiv.textContent = `${isEncryption ? 'Encrypted' : 'Decrypted'} Text = ${result}`;
-            visualizationSteps.appendChild(resultDiv);
+    // Step 1: Reverse the second columnar transposition
+    addVisualizationStep('Process', [
+        `Reversing second transposition using Key2: ${secondKey}`,
+        'Reconstructing matrix column by column based on Key2'
+    ], 'Step 1: Reverse second transposition');
 
-            return result;
-        }
+    // Step 2: Reverse the first columnar transposition
+    addVisualizationStep('Process', [
+        `Reversing first transposition using Key1: ${firstKey}`,
+        'Reconstructing matrix column by column based on Key1'
+    ], 'Step 2: Reverse first transposition');
 
-        function getAlphabetOrder(key) {
-            return [...key]
-                .map((char, index) => ({ char, index }))
-                .sort((a, b) => a.char.localeCompare(b.char))
-                .map((item, order) => ({ ...item, order: order + 1 }))
-                .sort((a, b) => a.index - b.index)
-                .map(item => item.order);
-        }
+    // Call the double columnar cipher decryption function
+    result = doubleColumnarCipherDecrypt(inputText, firstKey, secondKey);
+
+    // Add final visualization step to display the decrypted text
+    addVisualizationStep('Output', result, 'Decrypted text');
+    break;
+
+
+        case 'aes':
+            result = aesDecrypt(inputText, key);
+            break;
+
+        default:
+            result = 'Please select a cipher method.';
+    }
+
+    document.getElementById('result').textContent = `Decrypted Text: ${result}`;
+}
+
+// Utility function to get the alphabet order based on the key
+function getAlphabetOrder(key) {
+    return [...key]
+        .map((char, index) => ({ char, index }))
+        .sort((a, b) => a.char.localeCompare(b.char))
+        .map((item, order) => ({ ...item, order: order + 1 }))
+        .sort((a, b) => a.index - b.index)
+        .map(item => item.order);
+}
+
+
+
+
     </script>
 </body>
 </html>

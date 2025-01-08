@@ -1,7 +1,7 @@
 function doubleColumnarCipherEncrypt(text, key1, key2) {
     // Replace spaces with underscores
     text = text.replace(/ /g, '_');
-    //console.log("Original text after replacing spaces:", text);
+    addVisualizationStep('Input', text, 'Original text (with spaces replaced by underscores)');
 
     // Create the matrix for the first key (Key1: "love")
     let rows = Math.ceil(text.length / key1.length);
@@ -19,15 +19,13 @@ function doubleColumnarCipherEncrypt(text, key1, key2) {
             }
         }
     }
-
-    //console.log("Matrix after first transposition (row by row):", matrix);
+    addVisualizationStep('Process', matrix.map((row, i) => `Row ${i + 1}: ${row.join(' ')}`), 'Matrix after first filling (Key 1)');
 
     // Sort the first key and get the sorted indices (for key "love": 2, 3, 4, 1)
     const sortedKey1Indices = Array.from(key1).map((char, i) => ({ char, index: i }))
         .sort((a, b) => a.char.localeCompare(b.char))
         .map(item => item.index);
-
-    //console.log("Sorted key1 indices:", sortedKey1Indices);
+    addVisualizationStep('Process', sortedKey1Indices.map((idx, i) => `Column ${i + 1}: Key1 sorted index ${idx + 1}`), 'Sorted key1 indices');
 
     // Perform the first columnar transposition
     let transposed1 = '';
@@ -36,8 +34,7 @@ function doubleColumnarCipherEncrypt(text, key1, key2) {
             transposed1 += matrix[i][idx] || '';
         }
     }
-
-    //console.log("Text after first columnar transposition:", transposed1);
+    addVisualizationStep('Process', transposed1, 'Result after first columnar transposition');
 
     // Prepare for the second transposition (using Key2: "hate")
     rows = Math.ceil(transposed1.length / key2.length);
@@ -55,15 +52,13 @@ function doubleColumnarCipherEncrypt(text, key1, key2) {
             }
         }
     }
-
-   // console.log("Matrix after second transposition (row by row):", matrix);
+    addVisualizationStep('Process', matrix.map((row, i) => `Row ${i + 1}: ${row.join(' ')}`), 'Matrix after second filling (Key 2)');
 
     // Sort the second key and get the sorted indices (for key "hate": 3, 1, 4, 2)
     const sortedKey2Indices = Array.from(key2).map((char, i) => ({ char, index: i }))
         .sort((a, b) => a.char.localeCompare(b.char))
         .map(item => item.index);
-
-    //console.log("Sorted key2 indices:", sortedKey2Indices);
+    addVisualizationStep('Process', sortedKey2Indices.map((idx, i) => `Column ${i + 1}: Key2 sorted index ${idx + 1}`), 'Sorted key2 indices');
 
     // Perform the second columnar transposition
     let encrypted = '';
@@ -73,11 +68,10 @@ function doubleColumnarCipherEncrypt(text, key1, key2) {
         }
     }
 
-    //console.log("Encrypted text:", encrypted);
+    addVisualizationStep('Output', encrypted, 'Encrypted text (Final result)');
 
     return encrypted;
 }
-
 function doubleColumnarCipherDecrypt(text, key1, key2) {
     // Step 1: Reverse the second transposition
     const rows2 = Math.ceil(text.length / key2.length);
