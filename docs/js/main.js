@@ -14,6 +14,7 @@ document.getElementById('cipher-select').addEventListener('change', function () 
     // Show AES key length options when AES cipher is selected
     document.getElementById('aes-key-length-label').style.display = (cipherSelect === 'aes') ? 'block' : 'none';
     document.getElementById('aes-key-length').style.display = (cipherSelect === 'aes') ? 'block' : 'none';
+    document.getElementById('output-format').style.display = (cipherSelect === 'aes') ? 'block' : 'none';
 
     // Show/Hide AES related elements based on the selected cipher
     const aesElements = document.getElementsByClassName('aes'); // Get all elements with class 'aes'
