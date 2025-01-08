@@ -36,13 +36,55 @@
             <label for="key2" id="key2-label" style="display:none;">Key 2:</label>
             <input type="text" id="key2" placeholder="Enter second key" style="display:none;">
 
-            <!-- AES Key Length Selection -->
-            <label for="aes-key-length" id="aes-key-length-label" style="display:none;">AES Key Length:</label>
-            <select id="aes-key-length" style="display:none;">
-                <option value="128">128 bits</option>
-                <option value="192">192 bits</option>
-                <option value="256">256 bits</option>
-            </select>
+
+
+        <!-- AES Key Length Selection -->
+<label for="aes-key-length" id="aes-key-length-label" style="display:none;">AES Key Length:</label>
+<select id="aes-key-length" style="display:none;">
+    <option value="128">128 bits</option>
+    <option value="192">192 bits</option>
+    <option value="256">256 bits</option>
+</select>
+
+<br>
+
+<!-- AES Cipher Mode Selection -->
+<label for="aes-cipher-mode" id="aes">Select Cipher Mode of Encryption:</label>
+<select id="aes-cipher-mode" class="aes">
+    <option value="CBC">CBC</option>
+    <option value="ECB">ECB</option>
+    <option value="CTR">CTR</option>
+    <option value="GCM">CCM</option>
+</select>
+
+<br>
+
+<!-- AES Padding Selection -->
+<label for="aes-padding" id="aes">Select Padding:</label>
+<select id="aes-padding" class="aes">
+    <option value="PKCS5Padding">PKCS5Padding</option>
+    <!-- Add other padding modes if needed -->
+</select>
+
+<br>
+
+<!-- Initialization Vector (IV) -->
+<label for="aes-iv" id="aes">Enter Initialization Vector (Optional):</label>
+<input type="text" id="aes-iv" placeholder="Enter IV (16 bytes for CBC mode)" class="aes">
+
+<br>
+
+
+<!-- Output Text Format -->
+<label for="output-format"  id="aes">Output Text Format:</label>
+<select id="output-format" class="aes">
+    <option value="Base64">Base64</option>
+    <option value="Hex">Hex</option>
+</select>
+
+<br>
+
+
 
             <button onclick="processEncrypt()">Encrypt</button>
             <button onclick="processDecrypt()">Decrypt</button> 
@@ -123,7 +165,7 @@ function processEncrypt() {
     const inputText = document.getElementById('input-text').value;
     const key = document.getElementById('key').value;
     let result = '';
-
+  
     switch (cipherSelect) {
         case 'caesar':
             const shift = parseInt(document.getElementById('shift').value);
@@ -177,9 +219,24 @@ function processEncrypt() {
     break;
 
 
-        case 'aes':
-            result = aesEncrypt(inputText, key);  // Using the AES encryption function
-            break;
+  // Inside the "change" event listener or wherever you handle the cipher selection
+case 'aes':
+const inputText = document.getElementById('input-text').value;
+        const key = document.getElementById('key').value;
+        const keyLength = parseInt(document.getElementById('aes-key-length').value);
+        const mode = document.getElementById('aes-cipher-mode').value;
+        const padding = document.getElementById('aes-padding').value;
+        const iv = document.getElementById('aes-iv').value;
+        const outputFormat = document.getElementById('output-format').value;
+
+        // Encrypt the text with the selected options
+       result = aesEncrypt(inputText, key, keyLength, mode, padding, iv, outputFormat);
+        
+       
+    break;
+
+
+
 
         default:
             result = 'Please select a cipher method.';
@@ -288,9 +345,21 @@ case 'doublecolumnar':
     break;
 
 
-        case 'aes':
-            result = aesDecrypt(inputText, key);
-            break;
+    case 'aes':
+const inputText = document.getElementById('input-text').value;
+        const key = document.getElementById('key').value;
+        const keyLength = parseInt(document.getElementById('aes-key-length').value);
+        const mode = document.getElementById('aes-cipher-mode').value;
+        const padding = document.getElementById('aes-padding').value;
+        const iv = document.getElementById('aes-iv').value;
+        const outputFormat = document.getElementById('output-format').value;
+
+        // Encrypt the text with the selected options
+       result = aesDecrypt(inputText, key, keyLength, mode, padding, iv, outputFormat);
+        
+       
+    break;
+
 
         default:
             result = 'Please select a cipher method.';
@@ -298,6 +367,8 @@ case 'doublecolumnar':
 
     document.getElementById('result').textContent = `Decrypted Text: ${result}`;
 }
+
+
 
 // Utility function to get the alphabet order based on the key
 function getAlphabetOrder(key) {
